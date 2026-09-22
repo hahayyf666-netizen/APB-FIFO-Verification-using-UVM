@@ -127,7 +127,7 @@ The DUT is an **8-bit wide, 16-entry synchronous FIFO** accessible through the *
 | Offset | Register | Access | Description |
 |---|---|---|---|
 | `0x00` | **CTRL** | R/W | `[0]` Enable · `[1]` Clear · `[2]` Drop-on-Full |
-| `0x04` | **THRESH** | R/W | `[3:0]` Almost-Empty · `[7:4]` Almost-Full |
+| `0x04` | **THRESH** | R/W | `[15:8]` Almost-Empty · `[7:0]` Almost-Full |
 | `0x08` | **STATUS** | R | `[0]` Empty · `[1]` Full · `[2]` A.Empty · `[3]` A.Full · `[4]` OVF · `[5]` UDF · `[11:6]` Count |
 | `0x0C` | **DATA** | R/W | Write → push · Read → pop |
 
