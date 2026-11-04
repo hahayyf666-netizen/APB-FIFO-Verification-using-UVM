@@ -93,8 +93,8 @@ module apb_sync_fifo #(
   assign pop  = (PSEL && PENABLE && !PWRITE && (PADDR==DATA_O));
 
   // Count/flags
-  always @(posedge PCLK or posedge PRESETn) begin 
-    if (PRESETn) begin
+  always @(posedge PCLK or negedge PRESETn) begin
+    if (!PRESETn) begin
       count <= '0;
       wptr  <= '0;
       rptr  <= '0;
@@ -139,7 +139,7 @@ module apb_sync_fifo #(
 
         // Update empty/full
         empty <= (count == 0);
-        full  <= (count == DEPTH-1);
+        full  <= (count == DEPTH);
       end
     end
   end
