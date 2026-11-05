@@ -47,7 +47,7 @@ module apb_sync_fifo #(
       drop_on_full <= 1'b0;
       almost_full_th <= DEPTH-1; 
       almost_empty_th <= 8'd1;   
-      
+
     end else begin
       if (PSEL && !PENABLE && PWRITE) begin // setup phase latching
         unique case (PADDR)
@@ -66,12 +66,7 @@ module apb_sync_fifo #(
 
       // self-clear of CLR
       if (clr) clr <= 1'b0;
-
       
-      if (PSEL && PENABLE && !PWRITE) begin
-        overflow <= 1'b0;
-        underflow <= 1'b0;
-      end
     end
   end
 
@@ -100,6 +95,8 @@ module apb_sync_fifo #(
       rptr  <= '0;
       empty <= 1'b1;
       full  <= 1'b0;
+      overflow  <= 1'b0;
+      underflow <= 1'b0;
     end else begin
       if (clr) begin
         count <= '0;
@@ -107,6 +104,8 @@ module apb_sync_fifo #(
         rptr  <= '0;
         empty <= 1'b1;
         full  <= 1'b0;
+        overflow  <= 1'b0;
+        underflow <= 1'b0;
       end else if (en) begin
         // Push
         if (push) begin
