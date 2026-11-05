@@ -56,7 +56,7 @@ module top_tb;
     // - stress_test
     //--------------------------------------------------------------------------
     initial begin
-        run_test("basic_operation_test");
+        run_test();
     end
     
     // Simulation Timeout
