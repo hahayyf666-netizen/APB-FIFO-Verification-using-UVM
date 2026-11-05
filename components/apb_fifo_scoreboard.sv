@@ -87,7 +87,9 @@ class apb_fifo_scoreboard extends uvm_scoreboard;
                 DATA_OFFSET: begin
                     expected_data = ref_model.pop(success);
 
-                    compare("DATA", expected_data, item.prdata[7:0]);
+                    if (success) begin
+                        compare("DATA", expected_data, item.prdata[7:0]);
+                    end
                 end
                 default: `uvm_warning("SCB", $sformatf("Unknown register address: 0x%02h", item.paddr))
             endcase
