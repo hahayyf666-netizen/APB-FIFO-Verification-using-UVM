@@ -37,7 +37,7 @@ module apb_sync_fifo #(
 
   // APB default
   assign PREADY  = 1'b1;     // zero-wait state
-  assign PSLVERR = 1'b0;     
+  assign PSLVERR = PSEL && PENABLE && PWRITE && (PADDR == DATA_O) && en && full && drop_on_full;
 
   // Async reset 
   always @(negedge PRESETn or posedge PCLK) begin
