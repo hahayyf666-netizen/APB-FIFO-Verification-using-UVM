@@ -112,44 +112,79 @@ class threshold_sequence extends apb_base_sequence;
         `uvm_info(get_type_name(), $sformatf("THRESH updated: 0x%08h (almost_empty=%0d, almost_full=%0d)", 
                   thresh_read, thresh_read[15:8], thresh_read[7:0]), UVM_MEDIUM)
         
-        // **BUG CHECK**: Read status immediately - flags should reflect new thresholds instantly
-        // Expected: count=8, almost_full should be 1 (8 >= 6), almost_empty should be 1 (8 <= 10)
-        `uvm_info(get_type_name(), "═══════════════════════════════════════════════════════", UVM_MEDIUM)
-        `uvm_info(get_type_name(), "BUG CHECK: Reading status immediately after threshold change", UVM_MEDIUM)
-        `uvm_info(get_type_name(), "═══════════════════════════════════════════════════════", UVM_MEDIUM)
-        
-        read_status(empty, full, almost_full, almost_empty, overflow, underflow, count);
-        `uvm_info(get_type_name(), $sformatf("Immediate read: count=%0d, almost_full=%0b, almost_empty=%0b", 
-                  count, almost_full, almost_empty), UVM_MEDIUM)
-        `uvm_info(get_type_name(), $sformatf("Expected:       count=8,  almost_full=1,  almost_empty=1"), UVM_MEDIUM)
-        
-        if (almost_full && almost_empty) begin
-            `uvm_info(get_type_name(), "✓ PASS: Thresholds updated immediately (count=8: >= 6 for almost_full, <= 10 for almost_empty)", UVM_MEDIUM)
-        end else begin
-            `uvm_info(get_type_name(), "✗ FAIL: Threshold flags NOT immediately effective!", UVM_MEDIUM)
-            `uvm_info(get_type_name(), "        This reveals a TIMING BUG in threshold update logic", UVM_MEDIUM)
-            
-            // Wait one more clock and read again to see if flags catch up
-            `uvm_info(get_type_name(), "        Reading again after 1 clock cycle delay...", UVM_MEDIUM)
-            #10; // Wait one clock
-            read_status(empty, full, almost_full, almost_empty, overflow, underflow, count);
-            `uvm_info(get_type_name(), $sformatf("Delayed read:   count=%0d, almost_full=%0b, almost_empty=%0b", 
-                      count, almost_full, almost_empty), UVM_MEDIUM)
-            if (almost_full && almost_empty) begin
-                `uvm_info(get_type_name(), "        Flags updated after delay - confirms SYNCHRONIZATION BUG", UVM_MEDIUM)
+                // Check status after threshold write and THRESH readback
+        `uvm_info(get_type_name(),
+                  "Checking threshold flags after write and readback",
+                  UVM_MEDIUM)
+
+        read_status(empty, full, almost_full, almost_empty,
+                    overflow, underflow, count);
+
+        `uvm_info(get_type_name(),
+                  $sformatf("Status: count=%0d, AF=%0b, AE=%0b",
+                            count, almost_full, almost_empty),
+                  UVM_MEDIUM)
+
+        if (count != 8 || !almost_full || !almost_empty) begin
+
+            `uvm_error("THRESHOLD_CHECK",
+                $sformatf("Expected count=8, AF=1, AE=1; got count=%0d, AF=%0b, AE=%0b",
+                          count, almost_full, almost_empty))
+
+            // Diagnostic read after additional delay
+            `uvm_info(get_type_name(),
+                      "Checking flags again after additional delay",
+                      UVM_MEDIUM)
+
+            #10;
+
+            read_status(empty, full, almost_full, almost_empty,
+                        overflow, underflow, count);
+
+            `uvm_info(get_type_name(),
+                      $sformatf("Delayed read: count=%0d, AF=%0b, AE=%0b",
+                                count, almost_full, almost_empty),
+                      UVM_MEDIUM)
+
+            if (count == 8 && almost_full && almost_empty) begin
+                `uvm_info(get_type_name(),
+                          "Flags match expected values after additional delay; investigate update latency",
+                          UVM_MEDIUM)
             end
+
+        end else begin
+
+            `uvm_info(get_type_name(),
+                      "PASS: COUNT=8, AF=1, AE=1",
+                      UVM_MEDIUM)
+
         end
-        `uvm_info(get_type_name(), "═══════════════════════════════════════════════════════", UVM_MEDIUM)
-        
-        // Push 2 more to exceed almost_empty threshold
-        `uvm_info(get_type_name(), "Pushing 2 more elements (count should exceed almost_empty threshold)", UVM_MEDIUM)
-        for (int i = 0; i < 2; i++) begin
+
+        `uvm_info(get_type_name(),
+                  "===============================================",
+                  UVM_MEDIUM)
+
+        // Push 3 more elements to exceed almost_empty threshold
+        `uvm_info(get_type_name(),
+                  "Pushing 3 more elements, expected count=11",
+                  UVM_MEDIUM)
+
+        for (int i = 0; i < 3; i++) begin
             push_data(8'hD0 + i);
         end
-        read_status(empty, full, almost_full, almost_empty, overflow, underflow, count);
-        `uvm_info(get_type_name(), $sformatf("After 2 more pushes: count=%0d, almost_full=%0b, almost_empty=%0b (expect 0)", 
-                  count, almost_full, almost_empty), UVM_MEDIUM)
-        
+
+        read_status(empty, full, almost_full, almost_empty,
+                    overflow, underflow, count);
+
+        if (count != 11 || !almost_full || almost_empty) begin
+            `uvm_error("THRESHOLD_CHECK",
+                $sformatf("Expected count=11, AF=1, AE=0; got count=%0d, AF=%0b, AE=%0b",
+                          count, almost_full, almost_empty))
+        end else begin
+            `uvm_info(get_type_name(),
+                      "PASS: COUNT=11, AF=1, AE=0",
+                      UVM_MEDIUM)
+        end
         // Pop to test threshold behavior
         `uvm_info(get_type_name(), "Popping elements to test threshold crossings", UVM_MEDIUM)
         for (int i = 0; i < 6; i++) begin
