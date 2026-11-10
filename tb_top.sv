@@ -56,6 +56,7 @@ module top_tb;
     // - stress_test
     //--------------------------------------------------------------------------
     initial begin
+    $printtimescale(top_tb);
         run_test();
     end
     

@@ -74,7 +74,17 @@ module apb_sync_fifo #(
   always_comb begin
     PRDATA = 32'd0;
     unique case (PADDR)
-      STATUS_O: PRDATA = {18'd0, count[7:0], underflow, overflow, almost_empty, almost_full, full, empty};
+      STATUS_O: PRDATA = {
+              18'd0,
+                  {{(8-(AW+1)){1'b0}}, count},
+                      underflow,
+                          overflow,
+                              almost_empty,
+                                  almost_full,
+                                      full,
+                                          empty
+      };
+     // STATUS_O: PRDATA = {18'd0, count[7:0], underflow, overflow, almost_empty, almost_full, full, empty};
       DATA_O:   PRDATA = {24'd0, mem[rptr]};
       CTRL_O:   PRDATA = {29'd0, drop_on_full, clr, en};
       THRESH_O: PRDATA = {16'd0, almost_empty_th, almost_full_th};

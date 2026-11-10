@@ -28,8 +28,7 @@ VERBOSITY = UVM_MEDIUM
 #------------------------------------------------------------------------------
 
 # VCS Flags
-VCS_FLAGS = -full64 -sverilog -ntb_opts uvm-1.2 +define+VCS -debug_access+all $(INC_DIRS)
-
+VCS_FLAGS = -full64 -sverilog -timescale=1ns/1ps -ntb_opts uvm-1.2 +define+VCS -debug_access+all $(INC_DIRS)
 # Simulation Executable
 SIMV = simv
 

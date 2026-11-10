@@ -42,8 +42,19 @@ class stress_test extends apb_fifo_base_test;
     threshold_seq = threshold_sequence::type_id::create("threshold_seq");
     threshold_seq.start(env.agent.sequencer);
 
-    random_seq = random_sequence::type_id::create("random_seq");
-    random_seq.start(env.agent.sequencer);
+        random_seq = random_sequence::type_id::create("random_seq");
+
+            if (!random_seq.randomize()) begin
+                        `uvm_fatal("STRESS_TEST",
+                                    "Failed to randomize random_sequence")
+                            end else begin
+                                    `uvm_info(get_type_name(),
+                                                $sformatf("Random transaction count: %0d",
+                                                                      random_seq.num_transactions),
+                                                                                  UVM_MEDIUM)
+
+                                            random_seq.start(env.agent.sequencer);
+                                                end
 
     `uvm_info(get_type_name(), "====================== Stress Test Completed ======================", UVM_MEDIUM)
 

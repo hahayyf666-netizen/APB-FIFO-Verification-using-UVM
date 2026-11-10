@@ -16,9 +16,12 @@ class random_test extends apb_fifo_base_test;
     reset_seq.start(env.agent.sequencer);
     
     seq = random_sequence::type_id::create("seq");
-    seq.randomize() with {num_transactions == 100;};
-    seq.start(env.agent.sequencer);
-    
+
+    if (!seq.randomize() with {num_transactions == 100;}) begin
+        `uvm_fatal("RANDOM_TEST", "Failed to randomize random_sequence")
+        end
+
+        seq.start(env.agent.sequencer);
     phase.drop_objection(this);
   endtask : run_phase
   
